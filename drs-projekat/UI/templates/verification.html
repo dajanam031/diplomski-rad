@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>Verification</title>
+  <link rel="stylesheet" href="../static/styles/style.css">
+  </head>
+<body>
+    <!--VALIDACIJE-->
+    <script type="text/javascript">
+      function proveraVer(forma) {
+          if (forma.cardnumber.value.trim().length === 0) {
+              document.getElementById("cardnumber").focus();
+              alert("Field cardnumber cannot be empty!")
+              return false;
+          }
+          else if (forma.clientname.value.trim().length === 0) {
+              document.getElementById("clientname").focus();
+              alert("Field clientname cannot be empty!")
+              return false;
+          }
+          else if (forma.securitycode.value.trim().length === 0) {
+              document.getElementById("securitycode").focus();
+              alert("Field securitycode cannot be empty!")
+              return false;
+          }
+      }
+  </script>
+  <!--VALIDACIJE-->
+{% set user=session['user']%}
+<div class="banner">
+  <p>{{message}}</p>
+  <div class="navbar">
+    <ul>
+      {%if user and user.verified %}
+      <li><a href="/profile">Profile</a></li>
+      <li><a href="/balance">Pregled stanja</a></li>
+      <li><a href="/transactions">Transactions</a></li>
+      <li><a href="/logout">Logout</a></li>
+      {% elif user %}
+      <li><a href="/profile">Profile</a></li>
+      <li><a href="/verification">Verification</a></li>
+      <li><a href="/logout">Logout</a></li>
+      {%else%}
+      <li><a href="/signup">Sign Up</a></li>
+      <li><a href="/login">Login</a></li>
+      {%endif%}
+    </ul>
+  </div>
+  <div class="form">
+    <h1>VERIFICATION</h1>
+     <form method="POST" onsubmit="return proveraVer(this)">
+            <label for="cardnumber">Number</label>
+            <input
+                type="text"
+                class="form-control"
+                id="cardnumber"
+                name="cardnumber"
+                placeholder="xxxx xxxx xxxx xxxx"
+                required
+              />
+                <label for="clientname">Client Name</label>
+                <input
+                    type="text"
+                    class="form-control"
+                    id="clientname"
+                    name="clientname"
+                    placeholder="Enter client name"
+                    required
+                  />
+              <label for="expirydate">Date</label>
+              <input
+                type="text"
+                class="form-control"
+                id="expirydate"
+                name="expirydate"
+                placeholder="month/year"
+                required
+              />
+              <label for="securitycode">Security Code</label>
+              <input
+                type="text"
+                class="form-control"
+                id="securitycode"
+                name="securitycode"
+                placeholder="xxx"
+                required
+              />
+            <br />
+            <button type="submit">Submit</button>
+          </form>
+    </div>
+</div>
+</form>
+</body>
+</html>

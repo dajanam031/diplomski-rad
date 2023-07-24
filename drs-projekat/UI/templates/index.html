@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Index</title>
+    <link rel="stylesheet" href="../static/styles/style.css">
+  </head>
+  {% set user=session['user']%}
+  {{message}}
+  <body>
+    
+    <div class="banner">
+      <div class="navbar">
+        <ul>
+          {%if user and user.verified %}
+          <li><a href="/profile">Profile</a></li>
+          <li><a href="/balance">Pregled stanja</a></li>
+          <li><a href="/transactions">Transactions</a></li>
+          <li><a href="/logout">Logout</a></li>
+          {% elif user %}
+          <li><a href="/profile">Profile</a></li>
+          <li><a href="/verification">Verification</a></li>
+          <li><a href="/logout">Logout</a></li>
+          {%else%}
+          <li><a href="/signup">Sign Up</a></li>
+          <li><a href="/login">Login</a></li>
+          {%endif%}
+        </ul>
+      </div>
+      <div class="content">
+        <h1>Crypto Exchange</h1>
+      </div>
+    </div>
+  </body>   
+</html>

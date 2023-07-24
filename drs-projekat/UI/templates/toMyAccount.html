@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>Transfer to my account</title>
+  <link rel="stylesheet" href="../static/styles/style.css">
+  </head>
+<body>
+{% set user=session['user']%}
+<div class="banner">
+    {% with messages = get_flashed_messages() %}
+       {% if messages %}
+          {% for message in messages %}
+             <p>{{ message }}</p>
+          {% endfor %}
+       {% endif %}
+    {% endwith %}
+  <div class="navbar">
+    <ul>
+        {%if user and user.verified %}
+      <li><a href="/profile">Profile</a></li>
+      <li><a href="/balance">Pregled stanja</a></li>
+      <li><a href="/transactions">Transactions</a></li>
+      <li><a href="/logout">Logout</a></li>
+      {% elif user %}
+      <li><a href="/profile">Profile</a></li>
+      <li><a href="/verification">Verification</a></li>
+      <li><a href="/logout">Logout</a></li>
+      {%else%}
+      <li><a href="/signup">Sign Up</a></li>
+      <li><a href="/login">Login</a></li>
+      {%endif%}
+    </ul>
+  </div>
+  <div class="form">
+    <h1>TRANSFER MONEY TO MY ACCOUNT</h1>
+    <form method="POST">
+        <label for="amount">Iznos novca za prebacivanje sa kartice:</label>
+        <input
+            type="number"
+            step="any"
+            class="form-control"
+            id="amount"
+            name="amount"
+            placeholder="Enter amount"
+            required
+        />
+        <br />
+        <button type="submit">FINISH</button>
+    </form>
+  </div>
+</div>
+</body>
+</html>

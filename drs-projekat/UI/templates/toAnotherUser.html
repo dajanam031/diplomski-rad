@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>Transfer to another user</title>
+  <link rel="stylesheet" href="../static/styles/style.css">
+  </head>
+<body>
+{% set user=session['user']%}
+<div class="banner">
+  <p>{{message}}</p>
+  <div class="navbar">
+    <ul>
+        {%if user and user.verified %}
+      <li><a href="/profile">Profile</a></li>
+      <li><a href="/balance">Pregled stanja</a></li>
+      <li><a href="/transactions">Transactions</a></li>
+      <li><a href="/logout">Logout</a></li>
+      {% elif user %}
+      <li><a href="/profile">Profile</a></li>
+      <li><a href="/verification">Verification</a></li>
+      <li><a href="/logout">Logout</a></li>
+      {%else%}
+      <li><a href="/signup">Sign Up</a></li>
+      <li><a href="/login">Login</a></li>
+      {%endif%}
+    </ul>
+  </div>
+  <div class="form">
+    <h1>TRANSAKCIJA DRUGOM KORISNIKU</h1>
+<form method="POST">
+      <label for="email">Email adresa korisnika kom zelite da prebacite novac:</label>
+      <input
+        type="email"
+        class="form-control"
+        id="email"
+        name="email"
+        placeholder="Enter email"
+        required
+      />
+      <label for="amount">Kolicina novca</label>
+      <input
+        type="number"
+        step="any"
+        class="form-control"
+        id="amount"
+        name="amount"
+        placeholder="Enter amount"
+        required
+      />
+      <label for="currency">Valuta</label>
+      <select id="currency" name="currency">
+        <option value="dollar">DOLAR</option>
+        {% if user.balance_btc > 0 %}
+        <option value="bitcoin">BITCOIN</option>
+        {%endif%}
+        {% if user.balance_doge > 0 %}
+        <option value="dogecoin">DOGECOIN</option>
+        {%endif%}
+        {% if user.balance_ltc > 0 %}
+        <option value="litecoin">LITECOIN</option>
+        {%endif%}
+        {% if user.balance_eth > 0 %}
+        <option value="ethereum">ETHEREUM</option>
+        {%endif%}
+      </select>
+    <br />
+    <button type="submit">Send</button>
+  </form>
+  </div>
+</div>
+</body>
+</html>
