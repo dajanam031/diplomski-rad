@@ -1,7 +1,32 @@
 services:
+  database:
+    image: postgres
+    ports:
+      - "5432:5432"
+    restart: always
+
+    environment:
+      POSTGRES_USER: docker
+      POSTGRES_PASSWORD: docker
+      POSTGRES_HOST_AUTH_METHOD: "trust"
+      POSTGRES_DB: drsdb
+
+  adminer:
+    image: adminer
+    restart: always
+    depends_on:
+      - database
+    ports:
+      - "8080:8080"
+
+  
   engine:
     build: ./Engine
     ports:
       - "5001:5001"
     volumes:
       - ./Engine:/backend
+    links: 
+      - database
+    depends_on:
+      - database

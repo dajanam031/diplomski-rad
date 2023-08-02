@@ -1,5 +1,4 @@
 from operator import or_
-
 import requests
 from flask import Blueprint, jsonify
 import flask
@@ -11,6 +10,7 @@ import threading
 import time
 from database.enums import Card
 from multiprocessing import Queue
+from flask_jwt_extended import create_access_token
 
 user_blueprint = Blueprint('user_blueprint', __name__)
 transaction_queue = Queue()
@@ -18,107 +18,108 @@ transaction_queue = Queue()
 @user_blueprint.route('/signup', methods=['POST'])
 def signup():
     data = flask.request.json
-    firstname = data['firstname']
-    lastname = data['lastname']
-    address = data['address']
-    city = data['city']
-    country = data['country']
-    phoneNum = data['phoneNum']
-    email = data['email']
-    password = data['password']
 
-    localSession = Session(bind=engine)
+    localDBSession = Session(bind=engine)
     
-    existing_email = localSession.query(User).filter(User.email == email).first()
+    existing_email = localDBSession.query(User).filter(User.email == data['email']).first()
     if existing_email:
-        err = {'message' : 'User with that email already exists.'}, 400
-        return err
+        return jsonify({
+            'message': 'User with that email already exists. Try another one.'
+        }), 400
 
-    new_user = User(email=email, firstname=firstname, lastname=lastname,
-    password=generate_password_hash(password, method='sha256'),
-    address=address, city=city, country=country, phoneNumber = phoneNum, balance = 0)
+    new_user = User(email=data['email'], firstname=data['firstname'], lastname=data['lastname'],
+    password=generate_password_hash(data['password'], method='sha256'),
+    address=data['address'], city=data['city'], country=data['country'], phoneNumber = data['phoneNum'], balance = 0)
 
-    localSession.add(new_user)
-    localSession.commit()
+    localDBSession.add(new_user)
+    localDBSession.commit()
 
-    return updateUserInSession(new_user, localSession)
+    user_data={
+        'verificated': new_user.verified
+    }
+    token = create_access_token(identity=new_user.id, additional_claims=user_data)
+
+    localDBSession.close()
+
+    return jsonify({
+        'token': token
+    }), 200
 
 @user_blueprint.route('/login', methods=['POST'])
 def login():
     data = flask.request.json
-    email = data['email']
-    password = data['password']
 
-    localSession = Session(bind=engine)
-    user = localSession.query(User).filter(User.email == email).first()
+    localDBSession = Session(bind=engine)
+
+    user = localDBSession.query(User).filter(User.email == data['email']).first()
+
     if user:
-        if check_password_hash(user.password, password):
-            return updateUserInSession(user, localSession)
+        if check_password_hash(user.password, data['password']):
+            user_data={
+            'verificated': user.verified
+            }
+            token = create_access_token(identity=user.id, additional_claims=user_data)
+
+            localDBSession.close()
+
+            return jsonify({
+                'token': token
+            }), 200
         else:
-            err = {'message' : 'Incorrect password'}, 400 
-            return err
+            return jsonify({
+                'message': 'Incorrect password. Try again.'
+            }), 400
     else:
-        err = {'message' : 'User with this email does not exists.'}, 400
-        return err 
+        return jsonify({
+            'message': 'User with that email does not exists.'
+        }), 404
 
 
 @user_blueprint.route('/profile',methods=['POST'])
 def profile():
     data=flask.request.json
-    firstname = data['firstname']
-    lastname = data['lastname']
-    address = data['address']
-    city = data['city']
-    country = data['country']
-    phoneNum = data['phoneNum']
-    Email = data['email']
-    password = data['password']
+    localDBSession = Session(bind=engine)
 
-    localSession = Session(bind=engine)
+    user_to_update=localDBSession.query(User).filter(User.email == data['email']).first()
+    user_to_update.firstname = data['firstname']
+    user_to_update.lastname = data['lastname']
+    user_to_update.address = data['address']
+    user_to_update.city = data['city']
+    user_to_update.country = data['country']
+    user_to_update.phoneNumber = data['phoneNum']
+    user_to_update.email = data['email']
+    if len(data['password'].strip()):
+        user_to_update.password=generate_password_hash(data['password'], method='sha256')
 
-    user_to_update=localSession.query(User).filter(User.email==Email).first()
-    user_to_update.firstname=firstname
-    user_to_update.lastname=lastname
-    user_to_update.address=address
-    user_to_update.city=city
-    user_to_update.country=country
-    user_to_update.phoneNumber=phoneNum
-    user_to_update.email=Email
-    if len(password.strip()):
-        user_to_update.password=generate_password_hash(password, method='sha256')
-    localSession.commit()
-  
-    return updateUserInSession(user_to_update, localSession) # pamtile su se izmene samo u bazi
+    localDBSession.commit()
+    
     
 @user_blueprint.route('/verification', methods=['POST'])
 def verification():
     data = flask.request.json
-    cardnumber=data['cardnumber']
-    clientname = data['clientname']
-    expirydate=data['expirydate']
-    securitycode=data['securitycode']
+
+    # iz tokena dobaviti info o trenutnom korisniku, 
     user_email = data['user_email']
 
-    
-    if not cardnumber == Card.CARD_NUM.value:
+    if not data['cardnumber'] == Card.CARD_NUM.value:
         err = {'message' : 'Invalid card number.Try again.'}, 400
         return err
-    elif not expirydate == Card.EXPIRY_DATE.value:
+    elif not data['expirydate'] == Card.EXPIRY_DATE.value:
         err = {'message' : 'Invalid expiry date.Try again.'}, 400
         return err
-    elif not securitycode == Card.SECURITY_CODE.value:
+    elif not data['securitycode'] == Card.SECURITY_CODE.value:
         err = {'message' : 'Invalid security code. Try again.'}, 400
         return err
 
-    localSession = Session(bind=engine)
+    localDBSession = Session(bind=engine)
 
-    user_to_verify = localSession.query(User).filter(User.email==user_email).first()
+    user_to_verify = localDBSession.query(User).filter(User.email==user_email).first()
     user_to_verify.verified = True
 
     user_to_verify.balance += 1
 
-    localSession.commit()
-    return updateUserInSession(user_to_verify, localSession)
+    localDBSession.commit()
+    return updateUserInSession(user_to_verify, localDBSession)
 
 @user_blueprint.route('/sendMoneyToAnotherUser', methods=['POST'])
 def sendMoneyToAnotherUser():
@@ -234,6 +235,7 @@ def livePrices():
     url='https://api.coingecko.com/api/v3/simple/price?ids=bitcoin%2Cdogecoin%2Cethereum%2Clitecoin&vs_currencies=usd'
     prices=requests.get(url).json()
     return prices
+
 def updateUserInSession(user, session):
     success = {'firstname': user.firstname, 'lastname': user.lastname, 'address': user.address, 'city': user.city,
                'country': user.country, 'phoneNum': user.phoneNumber, 'email': user.email,
