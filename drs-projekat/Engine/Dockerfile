@@ -10,4 +10,4 @@ EXPOSE 5001
 
 COPY . .
 
-CMD [ "python", "engine.py" ]
+CMD [ "python", "main.py" ]

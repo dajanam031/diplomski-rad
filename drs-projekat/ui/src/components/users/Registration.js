@@ -14,11 +14,11 @@ import { useDispatch } from 'react-redux';
 import { setUser } from "../../redux/userSlice";
 import { GetUserVerification } from "../../utils/CurrentUser";
 import { UserRegistration } from "../../models/UserRegistration";
+import { useNavigate } from "react-router-dom";
 
 function Registration(){
     const [user, setRegisteredUser] = useState(new UserRegistration());
     const [errorMessage, setErrorMessage] = useState('');
-    const dispatch = useDispatch();
     const firstnameRef = useRef(null);
     const lastnameRef = useRef(null);
     const emailRef = useRef(null);
@@ -28,6 +28,9 @@ function Registration(){
     const countryRef = useRef(null);
     const passwordRef = useRef(null);
 
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if(!validateForm(user)){
@@ -36,6 +39,7 @@ function Registration(){
         try {
           const resp = await RegisterUser(user);
           dispatch(setUser({token: resp.token, isVerified: GetUserVerification(resp.token) }));
+          navigate('/');
           
         } catch (error) {
           setErrorMessage(error.message);
@@ -246,7 +250,7 @@ function Registration(){
             </Button>
             <Grid container justifyContent="flex-end">
                 <Grid item>
-                <Link href="/" variant="body2">
+                <Link href="/login" variant="body2">
                     Already have an account? Sign in
                 </Link>
                 </Grid>

@@ -10,11 +10,12 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { UserLogin } from '../../models/UserLogin';
-import { useState, useRef } from 'react';
-import { LoginUser } from '../../services/UserService';
+import { useState, useRef, useEffect } from 'react';
+import { LoginUser, SignInWithGoogle } from '../../services/UserService';
 import { useDispatch } from 'react-redux';
 import { setUser } from '../../redux/userSlice';
 import { GetUserVerification } from '../../utils/CurrentUser';
+import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
   const [user, setLoginUser] = useState(new UserLogin());
@@ -22,6 +23,7 @@ export default function Login() {
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -32,6 +34,7 @@ export default function Login() {
     try {
       const resp = await LoginUser(user);
       dispatch(setUser({ token: resp.token, isVerified: GetUserVerification(resp.token) }));
+      navigate('/');
 
     } catch (error) {
       setErrorMessage(error.message);
@@ -53,6 +56,42 @@ export default function Login() {
 
     return true;
   }
+
+  useEffect(() => {
+    /*global google*/
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+
+    const handleCallbackResponse =  async (response) => {
+      try {
+        const resp = await SignInWithGoogle({'token': response.credential});
+        dispatch(setUser({ token: resp.token, isVerified: GetUserVerification(resp.token) }));
+        navigate('/');
+  
+      } catch (error) {
+        setErrorMessage(error.message);
+      }
+    };
+
+    script.onload = () => {
+      google.accounts.id.initialize({
+        client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
+        callback: handleCallbackResponse,
+      });
+      google.accounts.id.renderButton(document.getElementById('signInDiv'), {
+        theme: 'outline',
+        size: 'large',
+      });
+    };
+
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, [dispatch, navigate]);
 
   return (
       <Container component="main" maxWidth="xs">
@@ -115,6 +154,15 @@ export default function Login() {
             >
               Sign In
             </Button>
+            <div
+        id="signInDiv"
+        style={{
+          display: 'flex',
+          justifyContent: 'center', // Center horizontally
+          alignItems: 'center', // Center vertically
+        }}
+      />
+      <br/>
             <Grid container justifyContent="flex-end">
               <Grid item>
                 <Link href="/signup" variant="body2">
