@@ -12,6 +12,7 @@ class User(Base):
     __tablename__ = 'users'
     id = Column(Integer(), primary_key=True)
     email = Column(String(50), nullable=False, unique=True)
+    username = Column(String(50))
     firstname = Column(String(50), nullable=False)
     lastname = Column(String(50), nullable=False)
     password = Column(String(150), nullable=False)
@@ -19,12 +20,13 @@ class User(Base):
     city = Column(String(50), nullable=False)
     country = Column(String(50), nullable=False)
     phoneNumber = Column(String(50), nullable=False)
+    verified = Column(Boolean, default=False)
+    social = Column(String(20), default = "regular")
     balance =  Column(Float, nullable=False)
     balance_btc= Column(Float,default=0)
     balance_ltc=Column(Float,default=0)
     balance_doge=Column(Float,default=0)
     balance_eth=Column(Float,default=0)
-    verified = Column(Boolean, default=False)
 
 class Transaction(Base):
     __tablename__ = 'transactions'

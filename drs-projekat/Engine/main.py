@@ -1,22 +1,26 @@
-from flask import Flask, url_for, jsonify
+from flask import Flask
 import blueprints.users
+import blueprints.auth
 from database.models import Base, engine
 from multiprocessing import Process
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
-from authlib.integrations.flask_client import OAuth
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 app = Flask(__name__)
-app.config['JWT_SECRET_KEY'] = 'thisissupposedtobeverycomplexkey'
-app.secret_key = 'verysecretkey'
+app.config['JWT_SECRET_KEY'] = os.getenv("JWT_SECRET_KEY")
+app.secret_key = os.getenv("SECRET_KEY")
 jwt = JWTManager(app)
 CORS(app, origins=['http://localhost:3000'])
-oauth = OAuth(app)
 
 Base.metadata.create_all(engine)
 
 if __name__ == '__main__':
     app.register_blueprint(blueprints.users.user_blueprint, url_prefix = '/engine/users')
+    app.register_blueprint(blueprints.auth.auth_blueprint, url_prefix = '/engine/auth')
     #app.register_blueprint(transaction_blueprint, url_prefix = '/engine/transactions')
     #p = Process(target=transaction_process, args=(transaction_queue, ))
     #p.start()

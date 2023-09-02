@@ -10,16 +10,19 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { UserLogin } from '../../models/UserLogin';
+import CircularProgress from '@mui/material/CircularProgress';
 import { useState, useRef, useEffect } from 'react';
-import { LoginUser, SignInWithGoogle } from '../../services/UserService';
+import { LoginUser, SignInWithGoogle, SignInWithGithub } from '../../services/UserService';
 import { useDispatch } from 'react-redux';
 import { setUser } from '../../redux/userSlice';
 import { GetUserVerification } from '../../utils/CurrentUser';
 import { useNavigate } from 'react-router-dom';
+import GitHubIcon from '@mui/icons-material/GitHub';
 
 export default function Login() {
   const [user, setLoginUser] = useState(new UserLogin());
   const [errorMessage, setErrorMessage] = useState('');
+  const [loading, setIsLoading] = useState(false);
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
   const dispatch = useDispatch();
@@ -93,85 +96,151 @@ export default function Login() {
     };
   }, [dispatch, navigate]);
 
+  function signInWithGithub(){
+    window.location.assign("https://github.com/login/oauth/authorize?client_id=" 
+                            + process.env.REACT_APP_GITHUB_CLIENT_ID);
+  }
+
+  useEffect(() => {
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const code = urlParams.get("code");
+
+    const getGithubToken = async () => {
+      if(code){
+        setIsLoading(true);
+        try{
+          const resp = await SignInWithGithub(code);
+          dispatch(setUser({ token: resp.token, isVerified: GetUserVerification(resp.token) }));
+          navigate('/');
+
+        }catch(error){
+          console.log(error.message);
+        }
+      }
+    };
+    
+    getGithubToken();
+  }, [dispatch, navigate]);
+
   return (
       <Container component="main" maxWidth="xs">
         <CssBaseline />
-        <Box
-          sx={{
-            marginTop: 8,
+          {loading ? (<div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    minHeight: '100vh', 
+                  }}
+                >
+                  <CircularProgress />
+                </div>) : (
+            <Box
+            sx={{
+              marginTop: 8,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+            }}
+          >
+            <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+              <LockOutlinedIcon />
+            </Avatar>
+            <Typography component="h1" variant="h5">
+              Sign in
+            </Typography>
+            <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+            {errorMessage && (
+              <Typography variant="body2" color="error" sx={{ textAlign: 'center' }}>
+                 {errorMessage}
+            </Typography>
+            )}
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="email"
+                label="Email Address"
+                name="email"
+                autoComplete='off'
+                inputProps={{ style: { background: 'transparent' } }}
+                autoFocus
+                inputRef={emailRef}
+                value={user.email}
+                onChange={(e) =>
+                  setLoginUser((prevUser) => ({ ...prevUser, email: e.target.value }))
+                }
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                name="password"
+                label="Password"
+                type="password"
+                id="password"
+                inputRef={passwordRef}
+                value={user.password}
+                onChange={(e) =>
+                  setLoginUser((prevUser) => ({ ...prevUser, password: e.target.value }))
+                }
+              />
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                sx={{ mt: 3, mb: 2 }}
+              >
+                Sign In
+              </Button>
+              <Grid container justifyContent="center">
+                <Grid item>
+                  <p>
+                    {"OR"}
+                  </p>
+                </Grid>
+              </Grid>
+              <Grid container direction="column" alignItems="center" spacing={2}>
+      <Grid item>
+        <div
+          id="signInDiv"
+          style={{
             display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
+            justifyContent: 'center',
+            alignItems: 'center'
           }}
         >
-          <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-            <LockOutlinedIcon />
-          </Avatar>
-          <Typography component="h1" variant="h5">
-            Sign in
-          </Typography>
-          <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
-          {errorMessage && (
-            <Typography variant="body2" color="error" sx={{ textAlign: 'center' }}>
-               {errorMessage}
-          </Typography>
-          )}
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete='off'
-              inputProps={{ style: { background: 'transparent' } }}
-              autoFocus
-              inputRef={emailRef}
-              value={user.email}
-              onChange={(e) =>
-                setLoginUser((prevUser) => ({ ...prevUser, email: e.target.value }))
-              }
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type="password"
-              id="password"
-              inputRef={passwordRef}
-              value={user.password}
-              onChange={(e) =>
-                setLoginUser((prevUser) => ({ ...prevUser, password: e.target.value }))
-              }
-            />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-            >
-              Sign In
-            </Button>
-            <div
-        id="signInDiv"
-        style={{
-          display: 'flex',
-          justifyContent: 'center', // Center horizontally
-          alignItems: 'center', // Center vertically
-        }}
-      />
-      <br/>
-            <Grid container justifyContent="flex-end">
-              <Grid item>
-                <Link href="/signup" variant="body2">
-                  {"Don't have an account? Sign Up"}
-                </Link>
+        </div>
+      </Grid>
+      <Grid item>
+        <Button
+          onClick={signInWithGithub}
+          fullWidth
+          variant="contained"
+          startIcon={<GitHubIcon />}
+          sx={{
+            width: '265px', 
+            color: 'black', 
+            backgroundColor: 'white'
+          }}
+        >
+          Sign in with Github
+        </Button>
+      </Grid>
+    </Grid>
+    <br/>
+              <Grid container justifyContent="flex-end">
+                <Grid item>
+                  <Link href="/signup" variant="body2">
+                    {"Don't have an account? Sign Up"}
+                  </Link>
+                </Grid>
               </Grid>
-            </Grid>
+            </Box>
           </Box>
-        </Box>
+          )}
+
       </Container>
   );
 }

@@ -22,6 +22,7 @@ function Registration(){
     const firstnameRef = useRef(null);
     const lastnameRef = useRef(null);
     const emailRef = useRef(null);
+    const usernameRef = useRef(null);
     const phonenumRef = useRef(null);
     const addressRef = useRef(null);
     const cityRef = useRef(null);
@@ -61,6 +62,11 @@ function Registration(){
         if(user.email.trim() === ''){
           setErrorMessage('Please fill out email.');
           emailRef.current.focus();
+          return false;
+        }
+        if(user.username.trim() === ''){
+          setErrorMessage('Please fill out username.');
+          usernameRef.current.focus();
           return false;
         }
         if(user.address.trim() === ''){
@@ -147,7 +153,7 @@ function Registration(){
                     }
                 />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={12} sm={6}>
                 <TextField
                     required
                     fullWidth
@@ -159,6 +165,21 @@ function Registration(){
                     value={user.email}
                     onChange={(e) =>
                         setRegisteredUser((prevUser) => ({ ...prevUser, email: e.target.value }))
+                    }
+                />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                <TextField
+                    required
+                    fullWidth
+                    id="username"
+                    label="Username"
+                    name="username"
+                    inputRef={usernameRef}
+                    autoComplete="off"
+                    value={user.username}
+                    onChange={(e) =>
+                        setRegisteredUser((prevUser) => ({ ...prevUser, username: e.target.value }))
                     }
                 />
                 </Grid>

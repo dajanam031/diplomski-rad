@@ -3,7 +3,7 @@ import apiClient from "../utils/ApiClient";
 
 export const RegisterUser = async (userData) => {
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/users/signup`, userData);
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/auth/signup`, userData);
       return response.data;
     } catch (error) {
       const errorMessage = error.response.data.message;
@@ -13,7 +13,7 @@ export const RegisterUser = async (userData) => {
 
   export const LoginUser = async (userData) => {
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/users/login`, userData);
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/auth/login`, userData);
       return response.data;
     } catch (error) {
       const errorMessage = error.response.data.message;
@@ -23,7 +23,25 @@ export const RegisterUser = async (userData) => {
 
   export const SignInWithGoogle = async (token) => {
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/users/google/auth`, token);
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/auth/google`, token);
+      return response.data;
+    } catch (error) {
+      const errorMessage = error.response.data.message;
+      throw new Error(errorMessage);
+    }
+  };
+
+  export const SignInWithGithub = async (code) => {
+    try {
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/auth/github`,
+        { code }, 
+        {
+          headers: {
+            'Content-Type': 'application/json', 
+          },
+        }
+      );
       return response.data;
     } catch (error) {
       const errorMessage = error.response.data.message;

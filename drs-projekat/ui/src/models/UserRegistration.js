@@ -4,6 +4,7 @@ export class UserRegistration {
     this.lastname = '';
     this.password = '';
     this.email = '';
+    this.username = '';
     this.address = '';
     this.city = '';
     this.country = '';

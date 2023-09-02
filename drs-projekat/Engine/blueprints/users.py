@@ -1,128 +1,23 @@
 from operator import or_
-import requests
+import requests as http_requests
 from flask import Blueprint, jsonify
 import flask
 from database.models import User,  Transaction, Session, engine
-from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.security import generate_password_hash
 import sha3
 import random
 import threading
 import time
 from database.enums import Card
 from multiprocessing import Queue
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-import main
-from google.oauth2 import id_token
-from google.auth.transport import requests
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 user_blueprint = Blueprint('user_blueprint', __name__)
 transaction_queue = Queue()
-GOOGLE_CLIENT_ID = '1007024445330-amna0iilhhrmpdm0nk6u0b15ck7rubbn.apps.googleusercontent.com'
 
-@user_blueprint.route('/google/auth', methods=['POST'])
-def google_auth():
-    token = flask.request.json.get('token')
-    try:
-        payload = id_token.verify_oauth2_token(
-            token, requests.Request(), GOOGLE_CLIENT_ID)
-        
-        localDBSession = Session(bind=engine)
-        user = localDBSession.query(User).filter(User.email == payload['email']).first()
-        if user:
-            user_data={
-            'verificated': user.verified
-            }
-            token = create_access_token(identity=user.id, additional_claims=user_data)
-
-            localDBSession.close()
-
-            return jsonify({
-                'token': token
-            }), 200
-
-        
-        new_user = User(email=payload['email'], firstname=payload['given_name'], lastname=payload['family_name'],
-        password=generate_password_hash('google password', method='sha256'),
-        address='', city='', country='', phoneNumber = '', balance = 0)
-
-        localDBSession.add(new_user)
-        localDBSession.commit()
-
-        user_data={
-            'verificated': new_user.verified
-        }
-        token = create_access_token(identity=new_user.id, additional_claims=user_data)
-
-        localDBSession.close()
-
-        return jsonify({
-            'token': token
-        }), 200
-
-    except ValueError as e:
-        return jsonify({'error': str(e)}), 401
-
-
-@user_blueprint.route('/signup', methods=['POST'])
-def signup():
-    data = flask.request.json
-    localDBSession = Session(bind=engine)
-    
-    existing_email = localDBSession.query(User).filter(User.email == data['email']).first()
-    if existing_email:
-        return jsonify({
-            'message': 'User with that email already exists. Try another one.'
-        }), 400
-
-    new_user = User(email=data['email'], firstname=data['firstname'], lastname=data['lastname'],
-    password=generate_password_hash(data['password'], method='sha256'),
-    address=data['address'], city=data['city'], country=data['country'], phoneNumber = data['phoneNum'], balance = 0)
-
-    localDBSession.add(new_user)
-    localDBSession.commit()
-
-    user_data={
-        'verificated': new_user.verified
-    }
-    token = create_access_token(identity=new_user.id, additional_claims=user_data)
-
-    localDBSession.close()
-
-    return jsonify({
-        'token': token
-    }), 200
-
-@user_blueprint.route('/login', methods=['POST'])
-def login():
-    data = flask.request.json
-
-    localDBSession = Session(bind=engine)
-
-    user = localDBSession.query(User).filter(User.email == data['email']).first()
-
-    if user:
-        if check_password_hash(user.password, data['password']):
-            user_data={
-            'verificated': user.verified
-            }
-            token = create_access_token(identity=user.id, additional_claims=user_data)
-
-            localDBSession.close()
-
-            return jsonify({
-                'token': token
-            }), 200
-        else:
-            return jsonify({
-                'message': 'Incorrect password. Try again.'
-            }), 400
-    else:
-        return jsonify({
-            'message': 'User with that email does not exists.'
-        }), 404
 
 @user_blueprint.route('/profile',methods=['GET'])
-@jwt_required() # only requests with valid jwt token can access this route
+@jwt_required() 
 def profile():
     current_user_id = get_jwt_identity()
     localDBSession = Session(bind=engine)
@@ -296,7 +191,7 @@ def changeCurrency():
 ############################################ POMOCNE FUNKCIJE #########################################################
 def livePrices():
     url='https://api.coingecko.com/api/v3/simple/price?ids=bitcoin%2Cdogecoin%2Cethereum%2Clitecoin&vs_currencies=usd'
-    prices=requests.get(url).json()
+    prices=http_requests.get(url).json()
     return prices
 
 def updateUserInSession(user, session):
