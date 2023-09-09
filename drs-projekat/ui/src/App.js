@@ -12,9 +12,9 @@ import { useDispatch } from 'react-redux';
 import { GetUserVerification, isTokenExpired } from './utils/CurrentUser';
 import { clearUser, setUser } from './redux/userSlice';
 import { Navigate } from 'react-router-dom';
+import SendMoney from './components/transactions/SendMoney';
 
 function App() {
-  // const user = useSelector((state) => state.user.user);
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
 
@@ -42,6 +42,7 @@ function App() {
     <>
     <ThemeProvider theme={darkTheme}>
       <Routes>
+            <Route path='/transaction' element={<SendMoney/>}/>
           <Route element={<PrivateRoutes/>}>
             <Route path='/profile' element={<Profile/>}/>
             <Route path='/' element={<Dashboard/>}/>

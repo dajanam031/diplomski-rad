@@ -17,6 +17,7 @@ const Profile = () => {
   useEffect(() => {
     profile();
   }, []);
+  
   return (
     <Paper elevation={3} className="container"> {/* Use the CSS class names */}
       <Grid container direction="column" alignItems="center" spacing={2}>

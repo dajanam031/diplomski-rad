@@ -14,15 +14,14 @@ import ListItemText from '@mui/material/ListItemText';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import CurrencyExchangeIcon from '@mui/icons-material/CurrencyExchange';
-import VerifiedIcon from '@mui/icons-material/Verified';
-import { useDispatch, useSelector } from 'react-redux';
+import PaidIcon from '@mui/icons-material/Paid';
+import { useDispatch } from 'react-redux';
 import { clearUser } from '../../redux/userSlice';
 import { Link } from 'react-router-dom';
 
 const drawerWidth = 240;
 
 export default function Dashboard() {
-  const user = useSelector((state) => state.user.user);
   const dispatch = useDispatch();
 
   const handleLogout = () => {
@@ -79,16 +78,14 @@ export default function Dashboard() {
             <ListItemText primary="Profile" />
           </ListItemButton>
         </ListItem>
-        {!user.isVerified && (
-          <ListItem disablePadding>
-          <ListItemButton>
+        <ListItem disablePadding>
+          <ListItemButton component={Link} to="/transaction">
             <ListItemIcon>
-              <VerifiedIcon />
+              <PaidIcon />
             </ListItemIcon>
-            <ListItemText primary="Verification" />
+            <ListItemText primary="Transactions" />
           </ListItemButton>
-          </ListItem>
-        )}
+        </ListItem>
       </List>
         <Divider />
         <List>
@@ -106,10 +103,6 @@ export default function Dashboard() {
         component="main"
         sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3 }}
       >
-        <Toolbar />
-        {!user.isVerified && (
-          <h3>Verify your account in order to access the application's functionalities.</h3>
-        )}
       </Box>
     </Box>
   );

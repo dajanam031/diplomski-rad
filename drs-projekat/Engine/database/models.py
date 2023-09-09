@@ -22,17 +22,3 @@ class User(Base):
     phoneNumber = Column(String(50), nullable=False)
     verified = Column(Boolean, default=False)
     social = Column(String(20), default = "regular")
-    balance =  Column(Float, nullable=False)
-    balance_btc= Column(Float,default=0)
-    balance_ltc=Column(Float,default=0)
-    balance_doge=Column(Float,default=0)
-    balance_eth=Column(Float,default=0)
-
-class Transaction(Base):
-    __tablename__ = 'transactions'
-    transaction_hash = Column(String(100), primary_key=True)
-    sender = Column(String(50), nullable=False)
-    reciever = Column(String(50), nullable=False)
-    amount = Column(Float, nullable=False)
-    currency = Column(String, default = "dollar")
-    state = Column(String(50), nullable=False)

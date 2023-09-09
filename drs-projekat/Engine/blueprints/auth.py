@@ -40,7 +40,7 @@ def google_auth():
         
         new_user = User(email=payload['email'], firstname=payload['given_name'], lastname=payload['family_name'],
         username='', password=generate_password_hash('google password', method='sha256'),
-        address='', city='', country='', phoneNumber = '', balance = 0, social="google")
+        address='', city='', country='', phoneNumber = '', social="google")
 
         localDBSession.add(new_user)
         localDBSession.commit()
@@ -101,7 +101,7 @@ def exchange_code_for_token():
 
                 new_user = User(email=user_data.get('email') or '', firstname=firstname, lastname=lastname,
                 username=user_data.get('login'), password=generate_password_hash('github password', method='sha256'),
-                address='', city=user_data.get('location') or '', country='', phoneNumber = '', balance = 0, social="github")
+                address='', city=user_data.get('location') or '', country='', phoneNumber = '', social="github")
 
                 localDBSession.add(new_user)
                 localDBSession.commit()
@@ -144,7 +144,7 @@ def signup():
 
     new_user = User(email=data['email'], firstname=data['firstname'], lastname=data['lastname'], username=data['username'],
     password=generate_password_hash(data['password'], method='sha256'),
-    address=data['address'], city=data['city'], country=data['country'], phoneNumber = data['phoneNum'], balance = 0)
+    address=data['address'], city=data['city'], country=data['country'], phoneNumber = data['phoneNum'])
 
     localDBSession.add(new_user)
     localDBSession.commit()
