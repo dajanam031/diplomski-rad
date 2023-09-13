@@ -15,7 +15,6 @@ import { useState, useRef, useEffect } from 'react';
 import { LoginUser, SignInWithGoogle, SignInWithGithub } from '../../services/UserService';
 import { useDispatch } from 'react-redux';
 import { setUser } from '../../redux/userSlice';
-import { GetUserVerification } from '../../utils/CurrentUser';
 import { useNavigate } from 'react-router-dom';
 import GitHubIcon from '@mui/icons-material/GitHub';
 
@@ -36,7 +35,7 @@ export default function Login() {
     
     try {
       const resp = await LoginUser(user);
-      dispatch(setUser({ token: resp.token, isVerified: GetUserVerification(resp.token) }));
+      dispatch(setUser({ token: resp.token}));
       navigate('/');
 
     } catch (error) {
@@ -70,7 +69,7 @@ export default function Login() {
     const handleCallbackResponse =  async (response) => {
       try {
         const resp = await SignInWithGoogle({'token': response.credential});
-        dispatch(setUser({ token: resp.token, isVerified: GetUserVerification(resp.token) }));
+        dispatch(setUser({ token: resp.token }));
         navigate('/');
   
       } catch (error) {
@@ -111,7 +110,7 @@ export default function Login() {
         setIsLoading(true);
         try{
           const resp = await SignInWithGithub(code);
-          dispatch(setUser({ token: resp.token, isVerified: GetUserVerification(resp.token) }));
+          dispatch(setUser({ token: resp.token}));
           navigate('/');
 
         }catch(error){

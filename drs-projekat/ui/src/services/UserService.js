@@ -57,3 +57,21 @@ export const RegisterUser = async (userData) => {
       throw new Error(error.response.data);
     }
   };
+
+  export const UpdateUserProfile = async (data) => {
+    try {
+      const response = await apiClient.put(`/users/edit-profile`, data);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response.data);
+    }
+  };
+
+  export const ChangePassword = async (data) => {
+    try {
+      const response = await apiClient.put(`/users/change-password`, data);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response.data);
+    }
+  };

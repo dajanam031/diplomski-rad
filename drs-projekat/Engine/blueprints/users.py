@@ -20,25 +20,70 @@ def profile():
             'message': 'User not found'
         }), 404
     
+    localDBSession.close()
+
     return jsonify({
-        'email': user.email
+        'email': user.email,
+        'username': user.username,
+        'firstname': user.firstname,
+        'lastname': user.lastname,
+        'address': user.address,
+        'city': user.city,
+        'country': user.country,
+        'phoneNum': user.phoneNumber,
+        'social': user.social
     }), 200
 
-@user_blueprint.route('/edit-profile',methods=['POST'])
+@user_blueprint.route('/edit-profile',methods=['PUT'])
+@jwt_required()
 def editProfile():
-    data=flask.request.json
+
+    current_user_id = get_jwt_identity()
+    data = flask.request.json
     localDBSession = Session(bind=engine)
 
-    user_to_update=localDBSession.query(User).filter(User.email == data['email']).first()
-    user_to_update.firstname = data['firstname']
-    user_to_update.lastname = data['lastname']
-    user_to_update.address = data['address']
-    user_to_update.city = data['city']
-    user_to_update.country = data['country']
-    user_to_update.phoneNumber = data['phoneNum']
-    user_to_update.email = data['email']
-    if len(data['password'].strip()):
-        user_to_update.password=generate_password_hash(data['password'], method='sha256')
+    user_to_update = localDBSession.query(User).filter(User.id == current_user_id).first()
 
-    localDBSession.commit()
+    if user_to_update:
+
+        user_to_update.email = data['email']
+        user_to_update.username = data['username']
+        user_to_update.firstname = data['firstname']
+        user_to_update.lastname = data['lastname']
+        user_to_update.address = data['address']
+        user_to_update.city = data['city']
+        user_to_update.country = data['country']
+        user_to_update.phoneNumber = data['phoneNum']
+
+        localDBSession.commit()
+
+        return jsonify({
+            'email': user_to_update.email,
+            'username': user_to_update.username,
+            'firstname': user_to_update.firstname,
+            'lastname': user_to_update.lastname,
+            'address': user_to_update.address,
+            'city': user_to_update.city,
+            'country': user_to_update.country,
+            'phoneNum': user_to_update.phoneNumber,
+            'social': user_to_update.social
+        }), 200
+
+    return jsonify({'error': 'User not found'}), 404
+
+@user_blueprint.route('/change-password',methods=['PUT'])
+@jwt_required()
+def changePassword():
+    current_user_id = get_jwt_identity()
+    data = flask.request.json
+    localDBSession = Session(bind=engine)
+
+    user_to_update = localDBSession.query(User).filter(User.id == current_user_id).first()
+
+    if user_to_update:
+        user_to_update.password = generate_password_hash(data['newPassword'], method='sha256')
+        localDBSession.commit()
+        localDBSession.close()
+        return jsonify({'message': 'Password is successfully changed'}), 200
     
+    return jsonify({'error': 'User not found'}), 404

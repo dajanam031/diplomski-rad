@@ -136,7 +136,7 @@ function SendMoney(){
                 margin="normal"
                 fullWidth
                 id="myAddress"
-                label="My address"
+                label="My Keplr address"
                 name="myAddress"
                 disabled
                 value={transaction.myAddress}
@@ -146,7 +146,7 @@ function SendMoney(){
                 disabled
                 fullWidth
                 name="myBalance"
-                label="Balance"
+                label="My Keplr balance"
                 id="myBalance"
                 value={transaction.myBalance}
               />

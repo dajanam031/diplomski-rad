@@ -8,6 +8,7 @@ from google.oauth2 import id_token
 from google.auth.transport import requests
 from dotenv import load_dotenv
 import os
+from datetime import timedelta
 
 auth_blueprint = Blueprint('auth_blueprint', __name__)
 load_dotenv()
@@ -26,10 +27,8 @@ def google_auth():
         localDBSession = Session(bind=engine)
         user = localDBSession.query(User).filter(User.email == payload['email'] and User.social == "google").first()
         if user:
-            user_data={
-            'verificated': user.verified
-            }
-            token = create_access_token(identity=user.id, additional_claims=user_data)
+            expires_in = timedelta(hours=1)
+            token = create_access_token(identity=user.id, expires_delta=expires_in)
 
             localDBSession.close()
 
@@ -45,10 +44,8 @@ def google_auth():
         localDBSession.add(new_user)
         localDBSession.commit()
 
-        user_data={
-            'verificated': new_user.verified
-        }
-        token = create_access_token(identity=new_user.id, additional_claims=user_data)
+        expires_in = timedelta(hours=1)
+        token = create_access_token(identity=new_user.id, expires_delta=expires_in)
 
         localDBSession.close()
 
@@ -86,10 +83,8 @@ def exchange_code_for_token():
                 user = localDBSession.query(User).filter(User.username == user_data.get('login') and
                                                           User.social == "github").first()
                 if user:
-                    user_data={
-                    'verificated': user.verified
-                    }
-                    token = create_access_token(identity=user.id, additional_claims=user_data)
+                    expires_in = timedelta(hours=1)
+                    token = create_access_token(identity=user.id, expires_delta=expires_in)
 
                     localDBSession.close()
 
@@ -106,10 +101,8 @@ def exchange_code_for_token():
                 localDBSession.add(new_user)
                 localDBSession.commit()
 
-                user_data={
-                    'verificated': new_user.verified
-                }
-                token = create_access_token(identity=new_user.id, additional_claims=user_data)
+                expires_in = timedelta(hours=1)
+                token = create_access_token(identity=new_user.id, expires_delta=expires_in)
 
                 localDBSession.close()
 
@@ -149,10 +142,8 @@ def signup():
     localDBSession.add(new_user)
     localDBSession.commit()
 
-    user_data={
-        'verificated': new_user.verified
-    }
-    token = create_access_token(identity=new_user.id, additional_claims=user_data)
+    expires_in = timedelta(hours=1)
+    token = create_access_token(identity=new_user.id, expires_delta=expires_in)
 
     localDBSession.close()
 
@@ -170,10 +161,8 @@ def login():
 
     if user:
         if check_password_hash(user.password, data['password']):
-            user_data={
-            'verificated': user.verified
-            }
-            token = create_access_token(identity=user.id, additional_claims=user_data)
+            expires_in = timedelta(hours=1)
+            token = create_access_token(identity=user.id, expires_delta=expires_in)
 
             localDBSession.close()
 

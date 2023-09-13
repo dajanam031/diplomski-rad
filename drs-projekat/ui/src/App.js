@@ -9,7 +9,7 @@ import darkTheme from './styles/theme';
 import { ThemeProvider } from '@mui/material/styles';
 import { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { GetUserVerification, isTokenExpired } from './utils/CurrentUser';
+import { isTokenExpired } from './utils/CurrentUser';
 import { clearUser, setUser } from './redux/userSlice';
 import { Navigate } from 'react-router-dom';
 import SendMoney from './components/transactions/SendMoney';
@@ -25,7 +25,6 @@ function App() {
       if (!isExpired) {
         const user = {
           token,
-          isVerified: GetUserVerification(token),
         };
         dispatch(setUser(user));
       } else {

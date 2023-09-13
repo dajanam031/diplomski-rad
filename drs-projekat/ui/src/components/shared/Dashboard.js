@@ -21,7 +21,7 @@ import { Link } from 'react-router-dom';
 
 const drawerWidth = 240;
 
-export default function Dashboard() {
+export default function Dashboard({content}) {
   const dispatch = useDispatch();
 
   const handleLogout = () => {
@@ -104,6 +104,7 @@ export default function Dashboard() {
         sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3 }}
       >
       </Box>
+      {content}
     </Box>
   );
 }
