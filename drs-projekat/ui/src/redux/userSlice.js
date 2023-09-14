@@ -2,8 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   user: {
-    token: localStorage.getItem('token') || null,
-    isVerified: false
+    token: localStorage.getItem('token') || null
   },
 };
 
@@ -12,17 +11,15 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     setUser: (state, action) => {
-      const { token, isVerified } = action.payload;
+      const { token } = action.payload;
       state.user = {
-        token,
-        isVerified,
+        token
       };
       localStorage.setItem('token', token); 
     },
     clearUser: (state) => {
       state.user = {
-        token: null,
-        isVerified: false
+        token: null
       };
       localStorage.removeItem('token'); 
     },

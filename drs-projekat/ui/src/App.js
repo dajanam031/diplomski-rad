@@ -41,9 +41,9 @@ function App() {
     <>
     <ThemeProvider theme={darkTheme}>
       <Routes>
-            <Route path='/transaction' element={<SendMoney/>}/>
           <Route element={<PrivateRoutes/>}>
             <Route path='/profile' element={<Profile/>}/>
+            <Route path='/transaction' element={<SendMoney/>}/>
             <Route path='/' element={<Dashboard/>}/>
           </Route>
 

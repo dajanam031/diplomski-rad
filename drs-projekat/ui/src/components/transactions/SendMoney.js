@@ -2,11 +2,14 @@ import React from "react";
 import { SigningStargateClient } from "@cosmjs/stargate";
 import { useState } from "react";
 import { Transaction } from "../../models/Transaction";
-import { TextField, Button, Container, Box, CssBaseline } from "@mui/material";
+import { TextField, Button, Grid, Snackbar, Alert } from "@mui/material";
 import History from "./History";
+import Dashboard from "../shared/Dashboard";
 
 function SendMoney(){
   const [transaction, setTransaction] = useState(new Transaction());
+  const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
 
   const checkKeplr = async (e) => {
       const { keplr } = window;
@@ -32,7 +35,7 @@ function SendMoney(){
           'https://rpc.sentry-01.theta-testnet.polypore.xyz', offlineSigner);
 
     const account = (await offlineSigner.getAccounts())[0];
-    const sendResult = await signingClient.sendTokens(
+    await signingClient.sendTokens(
       account.address, transaction.toAddress,[
         {
           denom: transaction.denom,
@@ -43,8 +46,8 @@ function SendMoney(){
         gas: "200000"
       }
     )
-    
-    console.log(sendResult);
+    setIsSnackbarOpen(true);
+    setSnackbarMessage("Successfully transfered tokens.");
     const balance = (await signingClient.getBalance(account.address, "uatom")).amount;
     setTransaction((prev) => ({ ...prev, myBalance: balance + ' ATOM', toAddress: '', toSend: ''}));
   }
@@ -121,78 +124,102 @@ function SendMoney(){
   }
     return (
         <>
-        <Container component="main" maxWidth="xs">
-        <CssBaseline />
-        <Box
-            sx={{
-              marginTop: 8,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-            }}
-          >
-            
-          <TextField
-                margin="normal"
-                fullWidth
-                id="myAddress"
-                label="My Keplr address"
-                name="myAddress"
-                disabled
-                value={transaction.myAddress}
-              />
-              <TextField
-                margin="normal"
-                disabled
-                fullWidth
-                name="myBalance"
-                label="My Keplr balance"
-                id="myBalance"
-                value={transaction.myBalance}
-              />
-              <Button
-                onClick={checkKeplr}
-                fullWidth
-                variant="contained"
-                sx={{ mt: 3, mb: 2 }}
-              >
-                Connect Keplr Wallet
-              </Button>
-              <TextField
-                margin="normal"
-                fullWidth
-                id="toAddress"
-                label="Reciever address"
-                name="toAddress"
-                autoComplete="off"
-                value={transaction.toAddress}
-                onChange={(e) =>
-                  setTransaction((prev) => ({ ...prev, toAddress: e.target.value }))
-                }
-              />
-              <TextField
-                margin="normal"
-                autoComplete="off"
-                fullWidth
-                name="toSend"
-                label="Amount of tokens"
-                id="toSend"
-                value={transaction.toSend}
-                onChange={(e) =>
-                  setTransaction((prev) => ({ ...prev, toSend: e.target.value }))
-                }
-              />
-              <Button
-                onClick={sendTokens}
-                fullWidth
-                variant="contained"
-                sx={{ mt: 3, mb: 2 }}
-              >
-                Send tokens
-              </Button>
-              <History walletAddress={transaction.myAddress}/>
-              </Box>
-              </Container>
+        <Dashboard content={
+          <div style={{ marginTop: '100px' }}>
+          <Grid container spacing={2}>
+          <Grid item xs={12} md={1} />
+          <Grid item xs={12} md={3}>
+            <TextField
+              margin="normal"
+              fullWidth
+              id="myAddress"
+              label="My Keplr address"
+              name="myAddress"
+              disabled
+              sx={{
+                width: '250px', 
+              }}
+              value={transaction.myAddress}
+            />
+            <TextField
+              margin="normal"
+              disabled
+              fullWidth
+              name="myBalance"
+              label="My Keplr balance"
+              id="myBalance"
+              sx={{
+                width: '250px', 
+              }}
+              value={transaction.myBalance}
+            />
+            <Button
+              onClick={checkKeplr}
+              fullWidth
+              variant="outlined"
+              sx={{ mt: 3, mb: 2, width: '250px' }}
+            >
+              Connect Keplr Wallet
+            </Button>
+          </Grid>
+          <Grid item xs={12} md={3} />
+          <Grid item xs={12} md={3}>
+            <TextField
+              margin="normal"
+              fullWidth
+              id="toAddress"
+              label="Receiver address"
+              name="toAddress"
+              autoComplete="off"
+              value={transaction.toAddress}
+              onChange={(e) =>
+                setTransaction((prev) => ({ ...prev, toAddress: e.target.value }))
+              }
+              sx={{
+                width: '250px', 
+              }}
+            />
+            <TextField
+              margin="normal"
+              autoComplete="off"
+              fullWidth
+              name="toSend"
+              label="Amount of tokens"
+              id="toSend"
+              value={transaction.toSend}
+              onChange={(e) =>
+                setTransaction((prev) => ({ ...prev, toSend: e.target.value }))
+              }
+              sx={{
+                width: '250px', 
+              }}
+            />
+            <Button
+              onClick={sendTokens}
+              fullWidth
+              variant="outlined"
+              sx={{ mt: 3, mb: 2, width: '250px' }}
+            >
+              Send tokens
+            </Button>
+          </Grid>
+          </Grid>
+          <br/>
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={9}>
+                  <History walletAddress={transaction.myAddress} />
+                  </Grid>
+          </Grid>
+          <Snackbar
+        open={isSnackbarOpen}
+        autoHideDuration={5000}
+        onClose={() => setIsSnackbarOpen(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+      >
+        <Alert severity="info">{snackbarMessage}</Alert>
+      </Snackbar>
+        </div>
+        }/>
         </>
     );
 };

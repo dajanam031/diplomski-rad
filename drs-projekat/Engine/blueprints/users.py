@@ -45,7 +45,14 @@ def editProfile():
     user_to_update = localDBSession.query(User).filter(User.id == current_user_id).first()
 
     if user_to_update:
-
+        if(localDBSession.query(User).filter(User.email == data['email']).first() 
+            and user_to_update.email != data['email']):
+            return jsonify({'message': 'User with that email already exists. Try again.'}), 500
+        
+        if(localDBSession.query(User).filter(User.username == data['username']).first() 
+            and user_to_update.username != data['username']):
+            return jsonify({'message': 'User with that username already exists. Try again.'}), 500
+            
         user_to_update.email = data['email']
         user_to_update.username = data['username']
         user_to_update.firstname = data['firstname']

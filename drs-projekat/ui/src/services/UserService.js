@@ -54,7 +54,8 @@ export const RegisterUser = async (userData) => {
       const response = await apiClient.get(`/users/profile`);
       return response.data;
     } catch (error) {
-      throw new Error(error.response.data);
+      const errorMessage = error.response.data.message;
+      throw new Error(errorMessage);
     }
   };
 
@@ -63,7 +64,8 @@ export const RegisterUser = async (userData) => {
       const response = await apiClient.put(`/users/edit-profile`, data);
       return response.data;
     } catch (error) {
-      throw new Error(error.response.data);
+      const errorMessage = error.response.data.message;
+      throw new Error(errorMessage);
     }
   };
 
@@ -72,6 +74,7 @@ export const RegisterUser = async (userData) => {
       const response = await apiClient.put(`/users/change-password`, data);
       return response.data;
     } catch (error) {
-      throw new Error(error.response.data);
+      const errorMessage = error.response.data.message;
+      throw new Error(errorMessage);
     }
   };

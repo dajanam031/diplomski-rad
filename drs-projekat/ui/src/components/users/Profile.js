@@ -46,6 +46,9 @@ const Profile = () => {
         setIsSnackbarOpen(true);
         setSnackbarMessage("Successfully updated profile data!");
       } catch (error) {
+        console.log(error);
+        setIsEditMode(false);
+        profile();
         setIsSnackbarOpen(true);
         setSnackbarMessage(error.message);
       }

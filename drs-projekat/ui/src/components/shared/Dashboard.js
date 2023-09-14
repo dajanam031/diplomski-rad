@@ -101,7 +101,14 @@ export default function Dashboard({content}) {
       </Drawer>
       <Box
         component="main"
-        sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3 }}
+        sx={{
+          flexGrow: 1,
+          bgcolor: 'background.default',
+          p: 3,
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'stretch', 
+        }}
       >
       </Box>
       {content}
